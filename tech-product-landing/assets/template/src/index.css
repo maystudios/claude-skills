@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Fallback for browsers without CSS @layer support (Chrome <99, Safari <15.4) */
+:root {
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-muted: #a1a1aa;
+  --color-border: #27272a;
+  --color-accent: #3b82f6;
+  --color-surface: #18181b;
+}
+
+@theme inline {
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-muted: #a1a1aa;
+  --color-border: #27272a;
+  /* ADAPT: change accent color — blue (#3b82f6) for dev tools,
+     green (#22c55e) for SaaS, purple (#a855f7) for AI products */
+  --color-accent: #3b82f6;
+  --color-accent-light: #60a5fa;
+  --color-surface: #18181b;
+  --color-surface-light: #27272a;
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+/* Marquee animations */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+.marquee        { animation: marquee         20s linear infinite; }
+.marquee-reverse { animation: marquee-reverse 25s linear infinite; }
+
+@media (max-width: 640px) {
+  .marquee         { animation-duration: 12s; }
+  .marquee-reverse { animation-duration: 15s; }
+}
