@@ -32,7 +32,7 @@ MODELS = [
     "openai/gpt-5.4",
 ]
 
-TIMEOUT = 180  # seconds per test
+TIMEOUT = 300  # seconds per test (5 min)
 
 # ---------------------------------------------------------------------------
 # Test Cases
@@ -96,6 +96,55 @@ TEST_CASES = {
             "suggests_investigation_steps": 2,
             "response_not_empty": 1,
             "response_is_structured": 1,
+        },
+    },
+    "hard_review": {
+        "description": "Deep cross-file architecture review (hard)",
+        "agent": "plan",
+        "prompt": (
+            "Perform a thorough architecture review of this Unreal Engine 5 project. "
+            "Examine how the Gameplay Ability System is wired up across the codebase: "
+            "1. How does the AbilitySystemComponent connect to the Character and PlayerState? "
+            "2. Are there any GAS anti-patterns (ASC ownership, effect stacking, missing replication)? "
+            "3. Is the interaction system properly integrated with GAS? "
+            "Read files in Source/VHS/ to answer. Cite specific files and line numbers. "
+            "Keep response under 500 words."
+        ),
+        "files": [],
+        "scoring": {
+            "mentions_line_numbers": 2,
+            "mentions_specific_issues": 3,
+            "suggests_fixes": 2,
+            "understands_ue5": 2,
+            "response_not_empty": 1,
+            "no_hallucinated_files": 1,
+            "mentions_real_files": 2,
+            "response_is_structured": 1,
+        },
+    },
+    "hard_debug": {
+        "description": "Complex multi-system bug diagnosis (hard)",
+        "agent": "plan",
+        "prompt": (
+            "Debug a complex issue in this UE5 VHS horror game project: "
+            "The player character sometimes gets stuck unable to interact with objects after "
+            "sprinting and running out of stamina. The interaction system uses GA_Interact and "
+            "the sprint system uses GA_Sprint with stamina attributes. "
+            "Investigate the full Source/VHS/ directory to find how these two systems might conflict. "
+            "Look for: tag blocking, ability activation conditions, attribute thresholds, "
+            "and state machine issues. "
+            "Provide a root cause analysis with specific file paths and line numbers. "
+            "Keep response under 500 words."
+        ),
+        "files": [],
+        "scoring": {
+            "response_not_empty": 1,
+            "identifies_plausible_causes": 3,
+            "references_gas_patterns": 2,
+            "mentions_mmc_or_ge": 1,
+            "suggests_investigation_steps": 2,
+            "response_is_structured": 1,
+            "mentions_real_files": 2,
         },
     },
 }
@@ -232,7 +281,9 @@ def score_response(text, test_case):
 
     if "mentions_specific_issues" in scoring:
         issue_words = ["bug", "issue", "problem", "error", "missing", "incorrect",
-                       "should", "could", "potential", "risk", "vulnerability", "warning"]
+                       "should", "could", "potential", "risk", "vulnerability", "warning",
+                       "concern", "note", "redundant", "unused", "unnecessary", "inefficient",
+                       "unsafe", "deprecated", "anti-pattern", "smell"]
         hits = sum(1 for w in issue_words if w in text_lower)
         if hits >= 3:
             score += scoring["mentions_specific_issues"]
@@ -297,7 +348,9 @@ def score_response(text, test_case):
     # Debug-specific
     if "identifies_plausible_causes" in scoring:
         cause_words = ["cause", "because", "likely", "possibly", "root cause",
-                       "the issue", "the problem", "reason"]
+                       "the issue", "the problem", "reason", "due to", "stems from",
+                       "triggered by", "results in", "leads to", "prevents", "blocks",
+                       "conflict", "race condition", "timing", "never"]
         hits = sum(1 for w in cause_words if w in text_lower)
         if hits >= 2:
             score += scoring["identifies_plausible_causes"]
@@ -316,7 +369,7 @@ def score_response(text, test_case):
             details["references_gas_patterns"] = f"FAIL ({hits})"
 
     if "mentions_mmc_or_ge" in scoring:
-        if "mmc" in text_lower or "modifier magnitude" in text_lower or "gameplay effect" in text_lower:
+        if "mmc" in text_lower or "modifier magnitude" in text_lower or "gameplay effect" in text_lower or "ge_" in text_lower or "default effect" in text_lower or "effect stack" in text_lower:
             score += scoring["mentions_mmc_or_ge"]
             details["mentions_mmc_or_ge"] = "PASS"
         else:

@@ -109,7 +109,11 @@ Use when the user wants OpenCode to investigate a bug or error.
 
 1. Select model (default: `openai/gpt-5.3-codex` for deep reasoning)
 2. Gather error messages, stack traces, and relevant code
-3. Construct diagnostic prompt with full context
+3. Construct diagnostic prompt with full context. For GAS bugs, always ask the model to check:
+   - Gameplay Tag blocking/requirements on abilities
+   - GameplayEffect application/removal ordering
+   - MMC dependencies and attribute clamping
+   - ASC initialization timing and DefaultEffects
 4. Run with `--agent plan` (Bash `timeout: 300000`):
    ```bash
    OPENCODE_DISABLE_AUTOUPDATE=true opencode run --format json --model <model> --agent plan --dir "<project-dir>" --dangerously-skip-permissions "<diagnostic prompt with error details>" 2>/dev/null
