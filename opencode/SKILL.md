@@ -154,7 +154,7 @@ When constructing prompts for OpenCode, always include:
 2. **File context** -- attach relevant files with `-f` or describe paths
 3. **Constraints** -- coding conventions, patterns, naming rules from CLAUDE.md
 4. **Output format** -- tell the model what form the answer should take
-5. **Scope limits** -- what NOT to change, boundaries of the task
+5. **Scope limits** -- what NOT to change, boundaries of the task. Be explicit about which directories to search ("Check ONLY AbilitySystem/", "Do NOT explore other directories"). Broad prompts cause timeouts.
 
 For UE5/VHS project tasks, prepend this context block:
 ```
