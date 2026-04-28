@@ -78,7 +78,7 @@ Parse these from user input after the skill invocation:
 Before constructing the prompt, run the script to get the best matching Gemini ratio:
 
 ```bash
-python "C:/Users/conta/.claude/skills/2d-pixel-asset/scripts/process_asset.py" \
+python "path/to/2d-pixel-asset/scripts/process_asset.py" \
   --size {target_size} --suggest-ratio
 ```
 
@@ -239,28 +239,28 @@ Skip this step if `--no-process` is set.
 
 ```bash
 # Default: Chroma key magenta
-python "C:/Users/conta/.claude/skills/2d-pixel-asset/scripts/process_asset.py" \
+python "path/to/2d-pixel-asset/scripts/process_asset.py" \
   ~/Downloads/{downloaded_file}.png \
   --size {target_size} \
   --bg-color magenta \
   --output {output_path}/{filename}.png
 
 # ML fallback (BiRefNet):
-python "C:/Users/conta/.claude/skills/2d-pixel-asset/scripts/process_asset.py" \
+python "path/to/2d-pixel-asset/scripts/process_asset.py" \
   ~/Downloads/{downloaded_file}.png \
   --size {target_size} \
   --ml \
   --output {output_path}/{filename}.png
 
 # Green chroma key:
-python "C:/Users/conta/.claude/skills/2d-pixel-asset/scripts/process_asset.py" \
+python "path/to/2d-pixel-asset/scripts/process_asset.py" \
   ~/Downloads/{downloaded_file}.png \
   --size {target_size} \
   --bg-color green \
   --output {output_path}/{filename}.png
 
 # Legacy white:
-python "C:/Users/conta/.claude/skills/2d-pixel-asset/scripts/process_asset.py" \
+python "path/to/2d-pixel-asset/scripts/process_asset.py" \
   ~/Downloads/{downloaded_file}.png \
   --size {target_size} \
   --bg-color white \
@@ -287,7 +287,7 @@ Use Chrome browser automation to remove background via Adobe Express:
 10. Find the downloaded file:
     ls -t ~/Downloads/*.png | head -5
 11. Then run process_asset.py with --no-remove-bg to only crop and rasterize:
-    python "C:/Users/conta/.claude/skills/2d-pixel-asset/scripts/process_asset.py" \
+    python "path/to/2d-pixel-asset/scripts/process_asset.py" \
       ~/Downloads/{adobe_result}.png \
       --size {target_size} \
       --no-remove-bg \

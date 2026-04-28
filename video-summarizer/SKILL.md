@@ -40,7 +40,7 @@ A custom prompt **completely replaces** the default. Examples of custom prompts:
 py scripts/summarize_videos.py
 
 # Default summary — specific directory
-py scripts/summarize_videos.py "C:/Users/conta/Downloads/videos"
+py scripts/summarize_videos.py "C:/path/to/videos"
 
 # Custom prompt (inline) — replaces default summary format
 py scripts/summarize_videos.py --prompt "Extract all product names and prices mentioned"

@@ -97,10 +97,22 @@ py -3.12 scripts/render.py "song.mid" --tempo 2.0 --transpose 3 --instrument 0
 | `--no-clean` | off | Skip ghost note removal |
 | `--no-key-filter` | off | Disable key-based filtering |
 | `--soundfont` | auto-detect | .sf2 SoundFont path |
+| `--soundfont-url` | (built-in defaults) | Custom SoundFont URL for auto-download |
+| `--no-auto-download` | off | Disable auto-download, fall back to built-in synthesis |
 | `--tempo` | 1.0 | Tempo scale factor |
 | `--transpose` | 0 | Semitones up/down |
 | `--instrument` | original | Override GM program (0-127) |
 | `--mp3` | off | Also produce MP3 |
+
+## SoundFont Auto-Download
+
+On first run, if no `.sf2` SoundFont is found in `soundfonts/`, `~/soundfonts/`, or system paths,
+`render.py` automatically downloads **GeneralUser GS v1.471** (~31 MB) into `soundfonts/`.
+Subsequent runs reuse the cached file.
+
+To opt out: pass `--no-auto-download` (falls back to built-in sine-wave synthesis).
+To use a different SoundFont: pass `--soundfont-url <url>` or set
+`MIDI_SYNTH_SOUNDFONT_URL` in the environment.
 
 ## Ghost Note Cleaning
 
@@ -115,5 +127,6 @@ The key filter only removes notes that are BOTH out-of-key AND below medium velo
 
 Auto-installed: `pretty_midi`, `numpy`, `soundfile`.
 For MusicXML input: `music21` (installed by audio-to-midi skill).
-Optional: `pyfluidsynth` + `.sf2` SoundFont for high-quality rendering.
+Optional: `pyfluidsynth` for high-quality rendering. The default SoundFont is auto-downloaded
+on first run (see "SoundFont Auto-Download" above).
 Runtime: Python 3.12 (`py -3.12`).
