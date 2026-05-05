@@ -12,6 +12,7 @@ A curated collection of production-ready [Claude Code](https://claude.ai/code) s
 | **[unreal-best-practices](./unreal-best-practices/)** | Modern UE5 development — GAS, Enhanced Input, StateTree, PCG, CommonUI, World Partition, naming conventions |
 | **[unreal-thirdparty](./unreal-thirdparty/)** | Integrating third-party C/C++ libraries — static/dynamic linking, Build.cs, cross-platform, ABI pitfalls |
 | **[unreal-pcg-python](./unreal-pcg-python/)** | PCG (Procedural Content Generation) Python integration — PCGPythonInterop plugin, custom nodes, editor automation |
+| **[unreal-blueprint-codegen](./unreal-blueprint-codegen/)** | Programmatically generate UE5 Blueprint and Widget Blueprint `.uasset` files from C++ — event graphs, UMG animations, Marketplace/Quick-Start sample generators |
 
 ### AI & LLM Integration
 
@@ -55,6 +56,7 @@ A curated collection of production-ready [Claude Code](https://claude.ai/code) s
 | Skill | What it does |
 |-------|-------------|
 | **[anthropic-skilljar-extractor](./anthropic-skilljar-extractor/)** | Extract any Anthropic Academy (Skilljar) course into a structured Markdown folder — one file per lesson, downloaded diagrams, organized by section |
+| **[auto-research](./auto-research/)** | Improve any SKILL.md, CLAUDE.md, subagent, or slash-command via web-researched best-practice rewrites and autonomous binary eval loops — cited rewrites, Karpathy-style validation |
 
 ## Quick Install
 

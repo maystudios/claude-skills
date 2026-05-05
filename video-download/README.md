@@ -30,12 +30,6 @@ py scripts/download.py "URL1" "URL2" "URL3" -o "/path/to/output"
 
 # Private or login-required content (uses browser cookies)
 py scripts/download.py "https://instagram.com/..." --cookies-from-browser chrome
-
-# Full playlist
-py scripts/download.py "https://www.youtube.com/playlist?list=..." --playlist -o "./out"
-
-# Higher quality
-py scripts/download.py "URL" --max-height 1080
 ```
 
 ### Arguments
@@ -44,40 +38,23 @@ py scripts/download.py "URL" --max-height 1080
 |---|---|
 | `urls` (positional) | One or more video URLs |
 | `-o`, `--output` | Output directory (default: current working directory) |
-| `--max-height` | Max video height in pixels (default: 720) |
-| `--playlist` | Download full playlist (default: single-video mode) |
-| `--cookies-from-browser` | Pull cookies from browser: `chrome`, `firefox`, `edge`, `brave`, etc. |
-| `--cookies` | Force a specific cookies.txt file |
-| `--no-archive` | Disable resume tracking |
+| `--cookies-from-browser` | Pull cookies from browser: `chrome`, `firefox`, `edge`, `safari` |
 
 ## Output
 
-Files are saved using these naming patterns:
+Files are saved using this naming pattern:
 
-- **Single video:** `{title} [{id}].mp4`
-- **Playlist:** `{NNN} - {title} [{id}].mp4` (zero-padded, sorts correctly)
+```
+{uploader}_{video_id}.mp4
+```
 
-## Auto-Recovery from YouTube Bot Detection
-
-The script automatically rotates through strategies when YouTube blocks the download:
-
-1. No auth + throttle (default)
-2. Player client rotation (`tv`, `mweb`, `web_safari`)
-3. Browser cookie rotation (tries installed browsers: Chrome → Edge → Firefox → Brave → ...)
-4. Cookies file discovery (picks newest `.txt` file from `~/Downloads/`)
-
-If all strategies fail, the script prints step-by-step recovery instructions.
-
-## Resume Safety
-
-Downloads use a `.download-archive.txt` file by default. Already-downloaded videos
-are skipped on re-runs — safe to restart after interruptions or add more URLs.
+Example: `DesignMotion_DUf3nehjIg7.mp4`
 
 ## Supported Platforms
 
 | Platform | Notes |
 |---|---|
-| YouTube | Single videos + playlists |
+| YouTube | Playlists supported (disabled by default) |
 | Instagram | Posts, Reels |
 | TikTok | |
 | Twitter / X | |
@@ -88,13 +65,10 @@ are skipped on re-runs — safe to restart after interruptions or add more URLs.
 
 ## Authentication
 
-For private or login-required content:
+For private or login-required content (e.g. private Instagram posts, age-restricted YouTube videos):
 
 1. Log in to the platform in your browser
-2. Pass `--cookies-from-browser chrome` (or `firefox`, `edge`, etc.)
-
-On Windows with Chrome 127+, Chrome must be **closed** for cookie access (App-Bound Encryption).
-Alternatively, export cookies via the "Get cookies.txt LOCALLY" extension and drop the file in `~/Downloads/`.
+2. Pass `--cookies-from-browser chrome` (or `firefox`, `edge`, `safari`)
 
 ## File Structure
 
@@ -102,6 +76,6 @@ Alternatively, export cookies via the "Get cookies.txt LOCALLY" extension and dr
 video-download/
   SKILL.md              # Claude skill configuration
   scripts/
-    download.py         # Main script (yt-dlp wrapper with auto-recovery)
+    download.py         # Main script (yt-dlp wrapper)
   README.md
 ```

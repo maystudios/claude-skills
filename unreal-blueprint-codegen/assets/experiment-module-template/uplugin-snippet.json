@@ -1,0 +1,6 @@
+{
+  "_comment_": "Append this entry to the host plugin's .uplugin Modules array. Editor type = excluded from cooked builds, exactly what we want for a content generator.",
+  "Name": "MyExperimentEditor",
+  "Type": "Editor",
+  "LoadingPhase": "Default"
+}

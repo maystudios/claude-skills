@@ -3,29 +3,12 @@
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 
 SOUNDFONT_DIR = Path(__file__).parent.parent / "soundfonts"
-
-# Auto-download targets. First entry is the default (smaller); second is a fallback.
-# Override via the MIDI_SYNTH_SOUNDFONT_URL env var or --soundfont-url flag.
-DEFAULT_SOUNDFONTS = [
-    {
-        "name": "GeneralUser_GS_v1.471.sf2",
-        "url": "https://archive.org/download/free-soundfonts-sf2-2019-04/GeneralUser%20GS%20v1.471.sf2",
-        "size": 31_281_186,
-    },
-    {
-        "name": "MuseScore_General.sf2",
-        "url": "https://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf2",
-        "size": 215_614_036,
-    },
-]
 
 SCALE_DEGREES = {
     'C major': {0, 2, 4, 5, 7, 9, 11}, 'C minor': {0, 2, 3, 5, 7, 8, 10},
@@ -162,71 +145,6 @@ def find_soundfont(explicit_path=None):
     return None
 
 
-def download_soundfont(target_dir=SOUNDFONT_DIR, url=None, name=None):
-    """Download a default SoundFont into target_dir. Returns path on success, None on failure.
-
-    Resolution order for url/name:
-      1. explicit url/name args
-      2. MIDI_SYNTH_SOUNDFONT_URL / MIDI_SYNTH_SOUNDFONT_NAME env vars
-      3. DEFAULT_SOUNDFONTS list (tried in order)
-    """
-    target_dir.mkdir(parents=True, exist_ok=True)
-
-    if url:
-        candidates = [{"name": name or Path(url).name, "url": url, "size": 0}]
-    elif os.environ.get("MIDI_SYNTH_SOUNDFONT_URL"):
-        env_url = os.environ["MIDI_SYNTH_SOUNDFONT_URL"]
-        env_name = os.environ.get("MIDI_SYNTH_SOUNDFONT_NAME") or Path(env_url).name
-        candidates = [{"name": env_name, "url": env_url, "size": 0}]
-    else:
-        candidates = DEFAULT_SOUNDFONTS
-
-    for cand in candidates:
-        dest = target_dir / cand["name"]
-        if dest.exists() and dest.stat().st_size > 1_000_000:
-            return dest
-
-        size_mb = cand["size"] / 1_048_576 if cand["size"] else 0
-        size_str = f" (~{size_mb:.0f} MB)" if size_mb else ""
-        print(f"  Downloading SoundFont: {cand['name']}{size_str}")
-        print(f"    From: {cand['url']}")
-        print(f"    To:   {dest}")
-
-        tmp = dest.with_suffix(dest.suffix + ".part")
-        try:
-            with urllib.request.urlopen(cand["url"], timeout=60) as resp:
-                total = int(resp.headers.get("Content-Length", 0))
-                downloaded = 0
-                last_pct = -1
-                with open(tmp, "wb") as out:
-                    while True:
-                        chunk = resp.read(1024 * 256)
-                        if not chunk:
-                            break
-                        out.write(chunk)
-                        downloaded += len(chunk)
-                        if total:
-                            pct = int(downloaded * 100 / total)
-                            if pct != last_pct and pct % 10 == 0:
-                                print(f"    {pct}% ({downloaded // 1_048_576} / {total // 1_048_576} MB)")
-                                last_pct = pct
-            if tmp.stat().st_size < 1_000_000:
-                tmp.unlink(missing_ok=True)
-                print(f"    Failed: file too small")
-                continue
-            tmp.replace(dest)
-            print(f"  Downloaded: {dest.name}")
-            return dest
-        except Exception as e:
-            tmp.unlink(missing_ok=True)
-            print(f"    Failed: {e}")
-            continue
-
-    print("  All SoundFont download candidates failed.")
-    print("  Manual download instructions: see soundfonts/README.md")
-    return None
-
-
 def has_fluidsynth_lib():
     try:
         import fluidsynth
@@ -319,9 +237,6 @@ def main():
     parser.add_argument('--analysis', '-a', help='Analysis JSON (auto-detected if omitted)')
     parser.add_argument('--mp3', action='store_true', help='Also produce MP3')
     parser.add_argument('--soundfont', '--sf', help='Path to .sf2 SoundFont')
-    parser.add_argument('--soundfont-url', help='URL to download a custom SoundFont (overrides defaults)')
-    parser.add_argument('--no-auto-download', action='store_true',
-                        help='Disable auto-download; fall back to built-in synthesis if no .sf2 found')
     parser.add_argument('--tempo', type=float, default=1.0, help='Tempo scale (0.5=half, 2.0=double)')
     parser.add_argument('--transpose', type=int, default=0, help='Transpose semitones')
     parser.add_argument('--instrument', type=int, help='Override instruments with GM number (0-127)')
@@ -384,9 +299,6 @@ def main():
         print(f"  Transpose: {args.transpose:+d} semitones")
 
     sf_path = find_soundfont(args.soundfont)
-    if not sf_path and not args.no_auto_download:
-        sf_path = download_soundfont(url=args.soundfont_url)
-
     success = False
     method = "built-in (sine waves)"
 

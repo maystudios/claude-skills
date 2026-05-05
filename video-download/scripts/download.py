@@ -57,7 +57,18 @@ def ensure_yt_dlp():
     except Exception:
         pass
     print("Installing yt-dlp...", flush=True)
-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-U", "yt-dlp"], check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-U",
+                    "yt-dlp[ejs]"], check=True)
+
+
+def detect_js_runtime() -> str | None:
+    """Return the name of an available JS runtime for YouTube n-challenge solving.
+    YouTube needs this to deobfuscate stream URLs. Without it, even authenticated
+    requests can't fetch the actual video formats."""
+    for runtime in ("deno", "node", "bun"):
+        if shutil.which(runtime):
+            return runtime
+    return None
 
 
 def looks_like_bot_block(stderr: str) -> bool:
@@ -128,6 +139,10 @@ def build_cmd(urls, *, output_template, format_sel, archive_path,
         "--fragment-retries", "10",
         "--concurrent-fragments", "4",
     ]
+    # Enable JS runtime for YouTube n-challenge solving (auto-detected).
+    # Without this, the auth handshake works but no playable streams come back.
+    if (rt := detect_js_runtime()):
+        cmd += ["--js-runtimes", rt]
     if no_playlist:
         cmd.append("--no-playlist")
     if archive_path:
