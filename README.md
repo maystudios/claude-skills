@@ -20,6 +20,7 @@ A curated collection of production-ready [Claude Code](https://claude.ai/code) s
 |-------|-------------|
 | **[opencode](./opencode/)** | Use OpenCode CLI as a sub-agent — delegate tasks to GPT-5.x, Codex, Gemini, or local models for implementation, review, and debugging |
 | **[llama-cpp](./llama-cpp/)** | Complete llama.cpp guide — C API, GGUF, quantization, GPU backends, HTTP server, grammar constraints, UE5 integration |
+| **[hermes-tweet](./hermes-tweet/)** | Use Hermes Tweet with Hermes Agent for X/Twitter endpoint discovery, reads, analytics, and guarded publishing |
 
 ### Image & Asset Generation
 
@@ -66,6 +67,7 @@ npx skills add maystudios/claude-skills
 
 # Or pick individual skills
 npx skills add maystudios/claude-skills/opencode
+npx skills add maystudios/claude-skills/hermes-tweet
 npx skills add maystudios/claude-skills/unreal-gas
 npx skills add maystudios/claude-skills/gemini-image-gen
 npx skills add maystudios/claude-skills/video-summarizer
