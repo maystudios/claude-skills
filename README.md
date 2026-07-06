@@ -28,6 +28,12 @@ A curated collection of production-ready [Claude Code](https://claude.ai/code) s
 | **[gemini-image-gen](./gemini-image-gen/)** | Generate images via Google Gemini — resolution control (0.5K-4K), reference images, style transfer, text rendering, inpainting |
 | **[2d-pixel-asset](./2d-pixel-asset/)** | Generate 2D pixel art game assets — sprites, tilesets, background removal, rasterization to exact pixel dimensions |
 
+### Video Generation
+
+| Skill | What it does |
+|-------|-------------|
+| **[seedance](./seedance/)** | Prompt ByteDance's Seedance 2.0 AI video model — text/image-to-video, first/last-frame, multi-reference & multi-shot, native synchronized audio (dialogue, SFX, music), character consistency, camera & cinematic control |
+
 ### Video & Media Processing
 
 | Skill | What it does |
@@ -68,6 +74,7 @@ npx skills add maystudios/claude-skills
 npx skills add maystudios/claude-skills/opencode
 npx skills add maystudios/claude-skills/unreal-gas
 npx skills add maystudios/claude-skills/gemini-image-gen
+npx skills add maystudios/claude-skills/seedance
 npx skills add maystudios/claude-skills/video-summarizer
 npx skills add maystudios/claude-skills/audio-to-midi
 npx skills add maystudios/claude-skills/midi-synth
