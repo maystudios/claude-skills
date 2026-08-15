@@ -7,14 +7,18 @@ description: Attach a local image or video to gemini.google.com through Chrome a
 
 Attaches a **local image or video** to the Gemini web composer and reads the reply. Verified working on `gemini.google.com/app`, Chrome, signed-in account, 2026-08-15.
 
+Needs the **claude-in-chrome** MCP server — `navigate`, `find`, `file_upload`, `computer`, `javascript_tool`, `get_page_text` — and a Chrome profile already signed in to Gemini. No API key.
+
 **Two different paths. Use the right one:**
 
 | Media | Path |
 |---|---|
-| **Video** | `find` Gemini's own hidden input → `file_upload` into it → real click on the composer. See "Video path" |
-| **Image** | Helper input → `paste` event. See "Image path" |
+| **Video** | `find` Gemini's own hidden input → `file_upload` into it → real click on the composer. See [Video path](#video-path) |
+| **Image** | Helper input → synthetic `paste` event. See [Image path](#image-path) |
 
-## Video path — the one that works
+> **Never click "Dateien hochladen" / "Upload files" in the uploads menu.** It opens the **native OS file dialog**, which blocks the whole automation session — no further tool call reaches the browser until a human dismisses it by hand.
+
+## Video path
 
 1. **Navigate** to `https://gemini.google.com/app`, wait for load.
 2. **Real click** the `+` / "Uploads & Tools" button in the composer. A JS `.click()` does not open the menu — it needs real pointer events. The hidden input only exists while this menu is open.
@@ -25,72 +29,11 @@ Attaches a **local image or video** to the Gemini web composer and reads the rep
 5. **Real click into the composer text area.** This is the trigger — Angular picks the file up on the next tick.
 6. **Wait, and be patient.** The thumbnail appears **later than you expect** — well beyond 8 s for a small clip. It renders as a still frame with a duration badge like `▶ 0:06`.
    **Do not conclude failure early.** That mistake cost a whole session once: the upload had in fact worked and was reported as impossible.
-7. Type the prompt, click send, poll `get_page_text`. Video analysis takes 30–60 s.
+7. **Type the prompt and send**, then poll `get_page_text` for the reply. Video analysis takes 30–60 s.
 
-Do **not** click "Dateien hochladen" / "Upload files" in the menu — that opens the **native OS file dialog** and blocks the whole automation session.
+## Image path
 
-## Image path — when the video path is not needed
-
-Gemini's own input rejects images (its `accept` list is documents and code only), so images go in through a synthetic `paste` instead.
-
-1. **Inject a helper input:**
-
-```js
-let el = document.getElementById('__cin_up');
-if (!el) {
-  el = document.createElement('input');
-  el.type = 'file';
-  el.id = '__cin_up';
-  el.setAttribute('accept', '*/*');
-  el.setAttribute('aria-label', 'claude helper upload');
-  el.style.cssText = 'position:fixed;top:8px;left:8px;z-index:2147483647;width:240px;height:30px;';
-  document.body.appendChild(el);
-}
-({ ready: true });
-```
-
-2. `find("claude helper upload file input")` → ref, then `file_upload` into it. Confirm:
-
-```js
-const f = document.getElementById('__cin_up').files[0];
-f ? ({ name: f.name, size: f.size, type: f.type }) : ({ error: 'no file' });
-```
-
-3. **Paste it into the composer** — this is what actually attaches an image:
-
-```js
-const f = document.getElementById('__cin_up').files[0];
-const dt = new DataTransfer();
-dt.items.add(f);
-const ce = document.querySelector('[contenteditable="true"]');
-ce.focus();
-const pe = new ClipboardEvent('paste', {
-  bubbles: true, cancelable: true, composed: true, clipboardData: dt
-});
-const notCancelled = ce.dispatchEvent(pe);
-await new Promise(r => setTimeout(r, 2500));
-({ notCancelled });                     // false means Gemini consumed it — that is success
-```
-
-4. **Remove the helper input afterwards** so it stops shadowing later `find` calls:
-
-```js
-const e = document.getElementById('__cin_up'); if (e) e.remove(); ({ removed: true });
-```
-
-## Why the obvious approaches fail
-
-| Attempt | Result |
-|---|---|
-| Click "Dateien hochladen" / "Upload files" | Opens the **native OS file dialog**, which blocks the whole automation session. Never click it |
-| `file_upload` into Gemini's own hidden input | The file genuinely lands in `input.files` — verified by reading name/size/type back — but Gemini never attaches it. Firing `input` + `change` manually does not help either |
-| Assign `DataTransfer` to Gemini's input from page JS | Gemini's input sits in a **closed shadow root**. `find` reaches it over CDP; `document.querySelectorAll` and a recursive open-shadow walk do **not** |
-| Drag-and-drop event on the composer | Handler fires and calls `preventDefault`, but nothing attaches |
-| `Set-Clipboard -Path <file>` then synthetic Ctrl+V | Synthetic key events do not read the OS clipboard |
-
-## The method that works
-
-Build **your own** file input in the page, let the browser tool fill it with the real file, then hand that `File` object to Gemini through a synthetic `paste` event. The paste path is the one Gemini's composer actually honours for images.
+Gemini's own input rejects images — its `accept` list is documents and code only — so images go in through a synthetic `paste` instead. Build **your own** file input in the page, let the browser tool fill it with the real file, then hand that `File` object to the composer as paste data. Paste is the one mechanism Gemini's composer honours for images.
 
 1. **Navigate** to `https://gemini.google.com/app` and wait for load.
 
@@ -147,12 +90,13 @@ const e = document.getElementById('__cin_up'); if (e) e.remove(); ({ removed: tr
 
 | Attempt | Result |
 |---|---|
-| Click "Dateien hochladen" / "Upload files" | Opens the **native OS file dialog**, which blocks the whole automation session |
-| `paste` event with `video/mp4` | Handler fires and calls `preventDefault`, but nothing attaches. Images attach immediately by the same mechanics |
-| `drop` event on the composer | Handler fires, nothing attaches |
-| Assign `DataTransfer` to Gemini's input from page JS | Gemini's input sits in a **closed shadow root**. `find` reaches it over CDP; `document.querySelectorAll` and a recursive open-shadow walk do **not** |
-| `Set-Clipboard -Path <file>` then synthetic Ctrl+V | Synthetic key events do not read the OS clipboard |
-| Google Drive as a staging area | Drive has **no** `input[type=file]` in its DOM and drives uploads through the native dialog |
+| Click "Dateien hochladen" / "Upload files" in the uploads menu | Opens the **native OS file dialog**, which blocks the whole automation session. Never click it |
+| `file_upload` into Gemini's hidden input, then fire `input` + `change` from JS | The file genuinely lands in `input.files` — verified by reading name, size and type back — but nothing attaches. The synthetic events are not the trigger; a **real click into the composer** is, which is why the video path works |
+| `paste` event carrying a `video/mp4` file | Handler fires and calls `preventDefault`, but nothing attaches. Images attach immediately by the exact same mechanics |
+| `drop` event on the composer | Handler fires and calls `preventDefault`, nothing attaches — images and video alike |
+| Assign a `DataTransfer` to Gemini's input from page JS | Gemini's input sits in a **closed shadow root**. `find` reaches it over CDP; `document.querySelectorAll` and a recursive open-shadow walk do **not** |
+| `Set-Clipboard -Path <file>` then a synthetic Ctrl+V | Synthetic key events do not read the OS clipboard |
+| Google Drive as a staging area | Drive has **no** `input[type=file]` in its DOM and drives uploads through the native dialog, so it cannot be automated either |
 
 ## Verified limits
 
@@ -161,12 +105,10 @@ const e = document.getElementById('__cin_up'); if (e) e.remove(); ({ removed: tr
 - **Path must be inside a session folder.** The session scratchpad works; arbitrary paths are rejected.
 - **A local HTTP server as a byte source does not work.** Gemini's CSP is `connect-src 'self' https://*.google.com … data:` — `localhost` is not allowed, and HTTPS→HTTP is mixed content regardless.
 - **Base64 into the JS call is CSP-legal** (`data:` is present) but costs far too many tokens at video sizes. Viable for a small image if the helper-input path ever breaks.
-- **Google Drive is not a workaround.** Drive has **no** `input[type=file]` in its DOM and drives uploads through the native dialog, so it cannot be automated either.
-- Gemini's hidden input only exists while the uploads menu is open, and the `uploader` component does **not** mount on every menu open. Re-open and retry if `find` comes back empty.
 
 ## Practical guidance
 
-For video, convert to a **frame grid** and send that instead — it is usually the better artifact anyway, because a labelled contact sheet lets the model compare poses directly:
+For video, converting to a **frame grid** and sending that instead is often better than the video path — a labelled contact sheet lets the model compare poses directly, and it sidesteps the 10 MB cap:
 
 ```powershell
 ffmpeg -y -i in.avi -vf "select='not(mod(n\,60))',scale=640:-1,tile=3x2" -frames:v 1 grid.png
