@@ -43,6 +43,8 @@ A curated collection of production-ready [Claude Code](https://claude.ai/code) s
 | **[link-download](./link-download/)** | Download videos as MP4 or extract audio as MP3 from 1000+ platforms via yt-dlp |
 | **[video-summarizer](./video-summarizer/)** | Analyze local MP4 files with Gemini API and generate structured Markdown summaries |
 | **[video-fetch-and-summarize](./video-fetch-and-summarize/)** | Download videos from URLs and auto-generate Markdown summaries with Gemini |
+| **[gemini-web-media-analysis](./gemini-web-media-analysis/)** | Attach a local image or video to gemini.google.com via Chrome (claude-in-chrome MCP) and read the analysis — no API key, no native file dialog |
+| **[meta-muse-video-analysis](./meta-muse-video-analysis/)** | Analyze local videos with Meta's Muse Spark 1.2 Contributor model — Files API upload, custom prompt, automatic remote cleanup |
 
 ### Audio & Music
 
@@ -78,6 +80,8 @@ npx skills add maystudios/claude-skills/unreal-gas
 npx skills add maystudios/claude-skills/gemini-image-gen
 npx skills add maystudios/claude-skills/seedance
 npx skills add maystudios/claude-skills/video-summarizer
+npx skills add maystudios/claude-skills/gemini-web-media-analysis
+npx skills add maystudios/claude-skills/meta-muse-video-analysis
 npx skills add maystudios/claude-skills/audio-to-midi
 npx skills add maystudios/claude-skills/midi-synth
 ```

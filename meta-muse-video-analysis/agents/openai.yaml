@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Muse Video Analysis"
+  short_description: "Analyze local videos with Meta Muse Spark"
+  default_prompt: "Use $meta-muse-video-analysis to analyze this video with my requested prompt."
